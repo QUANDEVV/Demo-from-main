@@ -1,0 +1,26 @@
+version: '3.9'
+services:
+  client:
+    build: .
+    container_name: proxima-web-client
+    ports:
+      - 3006:3006
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.webclient.rule=Host(`proximaai.co`) || Host(`www.proximaai.co`)"
+      - "traefik.http.routers.webclient.tls=true"
+      - "traefik.http.routers.webclient.entrypoints=websecure"
+      - "traefik.http.routers.webclient.tls.certresolver=letsencrypt"
+      - "traefik.http.services.webclient.loadbalancer.server.port=3006"
+      # use compression
+      - "traefik.http.routers.webclient.middlewares=test-compress"
+      - "traefik.http.middlewares.test-compress.compress=true"
+    environment:
+      - NEXT_PUBLIC_MATOMO_URL=https://matomo.proximaai.co/
+      - NEXT_PUBLIC_MATOMO_SITE_ID=1
+
+networks:
+  default:
+    external:
+      name: traefik_proxy
